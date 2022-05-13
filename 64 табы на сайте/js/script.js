@@ -107,5 +107,40 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     setClock('.timer', deadline);
+    //* модально окно
+
+    const btn = document.querySelectorAll('[data-modal]'),
+          close = document.querySelector('[data-close]'),
+          modal = document.querySelector('.modal');
+
+
+    
+    btn.forEach(item => {
+        item.addEventListener('click', () => {
+            modal.classList.toggle('show');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+     function closeModal() {
+        modal.classList.toggle('show');
+        document.body.style.overflow = '';
+     }
+    close.addEventListener('click', closeModal); //*функцию передаем как callback таким образом она будет вызвана только после клика
+
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {    //* у обьекта события есть свойство code в котором хранится название клавиши которая была нажата
+        if (e.code === 'Escape' && modal.classList.contains('show')) {
+            closeModal();
+        }
+    });
+
+    // document.addEventListener('keydown', (e) => {
+    //     console.log(e.code);
+    // });
 });
 
