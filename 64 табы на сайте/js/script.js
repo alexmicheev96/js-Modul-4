@@ -116,15 +116,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
     
     btn.forEach(item => {
-        item.addEventListener('click', () => {
-            modal.classList.toggle('show');
-            document.body.style.overflow = 'hidden';
-        });
+        item.addEventListener('click', openModal);
     });
-     function closeModal() {
+    function closeModal() {
+    modal.classList.toggle('show');
+    document.body.style.overflow = '';
+    }
+
+    function openModal() {
         modal.classList.toggle('show');
-        document.body.style.overflow = '';
-     }
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimer);
+    }
     close.addEventListener('click', closeModal); //*функцию передаем как callback таким образом она будет вызвана только после клика
 
     modal.addEventListener('click', (e) => {
@@ -138,9 +141,15 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
+    const modalTimer = setTimeout(openModal, 5000);                //*   запустит нашу функцию по открытию окна через 5 сек
 
-    // document.addEventListener('keydown', (e) => {
-    //     console.log(e.code);
-    // });
+    function showModalByScroll() {
+        if(window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
+            openModal();
+            window.removeEventListener('scroll', showModalByScroll);   //* запускаем обработчик события 1 раз 
+        }
+    }
+
+    window.addEventListener('scroll', showModalByScroll);
 });
 
