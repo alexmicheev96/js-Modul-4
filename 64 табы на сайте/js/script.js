@@ -113,8 +113,12 @@ window.addEventListener('DOMContentLoaded', () => {
           close = document.querySelector('[data-close]'),
           modal = document.querySelector('.modal');
 
+    function openModal() {
+        modal.classList.toggle('show');
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimer);
+    }
 
-    
     btn.forEach(item => {
         item.addEventListener('click', openModal);
     });
@@ -123,11 +127,9 @@ window.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
     }
 
-    function openModal() {
-        modal.classList.toggle('show');
-        document.body.style.overflow = 'hidden';
-        clearInterval(modalTimer);
-    }
+
+
+    
     close.addEventListener('click', closeModal); //*функцию передаем как callback таким образом она будет вызвана только после клика
 
     modal.addEventListener('click', (e) => {
@@ -141,7 +143,7 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
-    const modalTimer = setTimeout(openModal, 5000);                //*   запустит нашу функцию по открытию окна через 5 сек
+    // const modalTimer = setTimeout(openModal, 5000);                //*   запустит нашу функцию по открытию окна через 5 сек
 
     function showModalByScroll() {
         if(window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
@@ -151,5 +153,72 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addEventListener('scroll', showModalByScroll);
+    
+    
+    //* используем классы для карточек
+
+    class MenuCard {
+        constructor(src, alt, title, descr, price, parentSelector) {
+            this.src = src;
+            this.alt = alt;
+            this.title = title;
+            this.descr = descr;
+            this.price = price;
+            this.parent = document.querySelector(parentSelector);
+            this.transfer = 27;
+            this.changeToUAH();
+        }
+
+        changeToUAH() {
+            this.price = +this.price * this.transfer;
+        }
+
+        render() {
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div class="menu__item">
+                    <img src=${this.src} alt=${this.alt}>
+                    <h3 class="menu__item-subtitle">${this.title}</h3>
+                    <div class="menu__item-descr">${this.descr}</div>
+                    <div class="menu__item-divider"></div>
+                    <div class="menu__item-price">
+                        <div class="menu__item-cost">Цена:</div>
+                        <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+                    </div>
+                </div>
+            `;
+            this.parent.append(element);
+        }
+    }
+
+    new MenuCard(
+        "img/tabs/vegy.jpg",
+        "vegy",
+        'Меню "Фитнес"',
+        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
+        9,
+        ".menu .container",
+
+    ).render();
+    
+    new MenuCard(
+        "img/tabs/elite.jpg",
+        "vegy",
+        'Меню "Премиум"',
+        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
+        6,
+        ".menu .container",
+
+    ).render();
+    new MenuCard(
+        "img/tabs/post.jpg",
+        "vegy",
+        'Меню "Постное"',
+        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
+        5,
+        ".menu .container",
+
+    ).render();
+
 });
 
