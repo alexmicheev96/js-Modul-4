@@ -143,7 +143,7 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
-    // const modalTimer = setTimeout(openModal, 5000);                //*   запустит нашу функцию по открытию окна через 5 сек
+    const modalTimer = setTimeout(openModal, 5000);                //*   запустит нашу функцию по открытию окна через 5 сек
 
     function showModalByScroll() {
         if(window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
@@ -223,17 +223,56 @@ window.addEventListener('DOMContentLoaded', () => {
         5,
         ".menu .container",
     ).render();
+    
 
+    //* отправка формы на сервер
+
+    const forms = document.querySelectorAll('form');
+    const msg = {
+        loading: 'загрузка',
+        success: 'скоро свяжемся', 
+        failrule: ' что то не так',
+    };
+
+    forms.forEach(item => {
+        postData(item);  //* вызываем функцию postData с этим item(form)
+    });
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();   //* отмена стандартного поведения браузера
+
+            const statusMsg = document.createElement('div');
+            statusMsg.classList.add('status');
+            statusMsg.textContent = msg.loading;
+            form.append(statusMsg);
+            
+            const r = new XMLHttpRequest();
+            r.open('POST', 'server.php');
+
+            r.setRequestHeader('Content-type', 'application/json;');
+            const formData = new FormData(form);  //* помещаем в качестве аргумента ту форму с которой нужно собрать данные
+            const obj = {};
+
+            formData.forEach((item, i) => {
+                obj[i] = item;
+            });
+
+            const json = JSON.stringify(obj);
+            r.send(json);     //* отправка данных в формате json
+            r.addEventListener('load', () => {
+                if(r.status === 200) {
+                    console.log(r.response);
+                    statusMsg.textContent = msg.success;
+                    form.reset();    //* метод очистки формы
+                    setTimeout(()=> {
+                        statusMsg.remove();   //* очистка сообщения
+                    }, 2000);
+                } else {
+                    statusMsg.textContent = msg.failrule;
+                }
+            });
+        });
+    }
 });
 
  
-function getSum(a, b) {
-    function sum() {
-        console.log(this.a); //und or window
-        return a + b;    
-    }
- 
-    console.log(sum());
-}
- 
-getSum(4, 5);
