@@ -110,11 +110,11 @@ window.addEventListener('DOMContentLoaded', () => {
     //* модально окно
 
     const btn = document.querySelectorAll('[data-modal]'),
-          close = document.querySelector('[data-close]'),
           modal = document.querySelector('.modal');
 
     function openModal() {
-        modal.classList.toggle('show');
+        modal.classList.add('show');
+        modal.classList.remove('hide');
         document.body.style.overflow = 'hidden';
         clearInterval(modalTimer);
     }
@@ -123,17 +123,18 @@ window.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', openModal);
     });
     function closeModal() {
-    modal.classList.toggle('show');
+    modal.classList.remove('show');
+    modal.classList.add('hide');
     document.body.style.overflow = '';
     }
 
 
 
     
-    close.addEventListener('click', closeModal); //*функцию передаем как callback таким образом она будет вызвана только после клика
+    // close.addEventListener('click', closeModal); //*функцию передаем как callback таким образом она будет вызвана только после клика
 
     modal.addEventListener('click', (e) => {
-        if(e.target === modal) {
+        if(e.target === modal || e.target.getAttribute('data-close') == '' ) {//* закрываем модалку на крестик с помощью второго условия
             closeModal();
         }
     });
@@ -143,7 +144,7 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
-    const modalTimer = setTimeout(openModal, 5000);                //*   запустит нашу функцию по открытию окна через 5 сек
+    const modalTimer = setTimeout(openModal, 50000);                //*   запустит нашу функцию по открытию окна через 50 сек
 
     function showModalByScroll() {
         if(window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
@@ -229,9 +230,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const forms = document.querySelectorAll('form');
     const msg = {
-        loading: 'загрузка',
-        success: 'скоро свяжемся', 
-        failrule: ' что то не так',
+        loading: 'img/spinner.svg',
+        success: 'Спасибо! Мы скоро с вами свяжемся...', 
+        failrule: 'Что-то пошло не так... Извините!',
     };
 
     forms.forEach(item => {
@@ -241,18 +242,20 @@ window.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (e) => {
             e.preventDefault();   //* отмена стандартного поведения браузера
 
-            const statusMsg = document.createElement('div');
-            statusMsg.classList.add('status');
-            statusMsg.textContent = msg.loading;
-            form.append(statusMsg);
+            let statusMsg = document.createElement('img');
+            statusMsg.src = msg.loading;
+            statusMsg.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
+            form.insertAdjacentElement('afterend' , statusMsg);
             
             const r = new XMLHttpRequest();
             r.open('POST', 'server.php');
 
-            r.setRequestHeader('Content-type', 'application/json;');
+            r.setRequestHeader('Content-type', 'application/json; charset=utf-8');
             const formData = new FormData(form);  //* помещаем в качестве аргумента ту форму с которой нужно собрать данные
             const obj = {};
-
             formData.forEach((item, i) => {
                 obj[i] = item;
             });
@@ -262,17 +265,39 @@ window.addEventListener('DOMContentLoaded', () => {
             r.addEventListener('load', () => {
                 if(r.status === 200) {
                     console.log(r.response);
-                    statusMsg.textContent = msg.success;
+                    showThanksModal(msg.success);
+                    statusMsg.remove();   //* очистка сообщения
                     form.reset();    //* метод очистки формы
-                    setTimeout(()=> {
-                        statusMsg.remove();   //* очистка сообщения
-                    }, 2000);
+                    
                 } else {
-                    statusMsg.textContent = msg.failrule;
+                    showThanksModal(msg.failrule);
                 }
             });
         });
     }
+    //* красивое оповещение пользователя
+    function showThanksModal(message) {
+        const prevModalDiaolog = document.querySelector('.modal__dialog');
+        prevModalDiaolog.classList.add('hide');
+
+        openModal();   //* отркытие модального окна
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+            <div class="modal__content">
+                <div class="modal__close" data-close>×</div>
+                <div class="modal__title">${message}</div>
+            </div>
+        `;
+        document.querySelector('.modal').append(thanksModal);
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModalDiaolog.classList.add('show');
+            prevModalDiaolog.classList.remove('hide');
+            closeModal();
+        }, 4000);
+    }   
 });
 
  
